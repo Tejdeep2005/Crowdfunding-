@@ -10,7 +10,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [isActive, setIsActive] = useState('dashboard');
   const [toggleDrawer, setToggleDrawer] = useState(false);
-  const { connect, address } = useStateContext();
+  const { connect, address, walletType } = useStateContext();
 
   return (
     <div className="flex md:flex-row flex-col-reverse justify-between mb-[35px] gap-6">
@@ -25,7 +25,7 @@ const Navbar = () => {
       <div className="sm:flex hidden flex-row justify-end gap-4">
         <CustomButton 
           btnType="button"
-          title={address ? 'Create a campaign' : 'Connect'}
+          title={address ? 'Create a campaign' : `Connect ${walletType || 'Wallet'}`}
           styles={address ? 'bg-[#1dc071]' : 'bg-[#8c6dfd]'}
           handleClick={() => {
             if(address) navigate('create-campaign')
@@ -80,7 +80,7 @@ const Navbar = () => {
             <div className="flex mx-4">
             <CustomButton 
               btnType="button"
-              title={address ? 'Create a campaign' : 'Connect'}
+              title={address ? 'Create a campaign' : `Connect ${walletType || 'Wallet'}`}
               styles={address ? 'bg-[#1dc071]' : 'bg-[#8c6dfd]'}
               handleClick={() => {
                 if(address) navigate('create-campaign')

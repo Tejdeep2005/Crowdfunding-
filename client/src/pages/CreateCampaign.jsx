@@ -10,7 +10,7 @@ import { checkIfImage } from '../utils';
 const CreateCampaign = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const { createCampaign } = useStateContext();
+  const { createCampaign, createCampaignDirect } = useStateContext();
   const [form, setForm] = useState({
     name: '',
     title: '',
@@ -27,17 +27,56 @@ const CreateCampaign = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Basic validation
+    if (!form.name || !form.title || !form.description || !form.target || !form.deadline || !form.image) {
+      alert('Please fill in all fields');
+      return;
+    }
+
     checkIfImage(form.image, async (exists) => {
       if(exists) {
-        setIsLoading(true)
-        await createCampaign({ ...form, target: ethers.utils.parseUnits(form.target, 18)})
-        setIsLoading(false);
-        navigate('/');
+        setIsLoading(true);
+        try {
+          await createCampaign(form); // Pass the form as-is, let context handle parsing
+          setIsLoading(false);
+          navigate('/');
+        } catch (error) {
+          setIsLoading(false);
+          console.error('Campaign creation failed:', error);
+        }
       } else {
-        alert('Provide valid image URL')
+        alert('Provide valid image URL');
         setForm({ ...form, image: '' });
       }
-    })
+    });
+  }
+
+  const handleDirectSubmit = async (e) => {
+    e.preventDefault();
+
+    // Basic validation
+    if (!form.name || !form.title || !form.description || !form.target || !form.deadline || !form.image) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    checkIfImage(form.image, async (exists) => {
+      if(exists) {
+        setIsLoading(true);
+        try {
+          await createCampaignDirect(form); // Use direct RPC method
+          setIsLoading(false);
+          // Don't navigate immediately, let user see the transaction hash
+          setTimeout(() => navigate('/'), 3000);
+        } catch (error) {
+          setIsLoading(false);
+          console.error('Direct campaign creation failed:', error);
+        }
+      } else {
+        alert('Provide valid image URL');
+        setForm({ ...form, image: '' });
+      }
+    });
   }
 
   return (
@@ -103,11 +142,17 @@ const CreateCampaign = () => {
             handleChange={(e) => handleFormFieldChange('image', e)}
           />
 
-          <div className="flex justify-center items-center mt-[40px]">
+          <div className="flex justify-center items-center mt-[40px] gap-4">
             <CustomButton 
               btnType="submit"
               title="Submit new campaign"
               styles="bg-[#1dc071]"
+            />
+            <CustomButton 
+              btnType="button"
+              title="Direct RPC Method"
+              styles="bg-[#ff6b6b]"
+              handleClick={handleDirectSubmit}
             />
           </div>
       </form>
